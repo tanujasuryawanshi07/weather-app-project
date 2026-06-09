@@ -58,25 +58,3 @@ Submit :
  Project Type    : B
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-# weather-app-project
