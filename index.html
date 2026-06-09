@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Weather App 🌤️</title>
+
+    <style>
+        body{
+            margin:0;
+            font-family:Arial;
+            background:#87CEEB;
+            height:100vh;
+            display:flex;
+            justify-content:center;
+            align-items:center;
+        }
+
+        .box{
+            background:white;
+            padding:25px;
+            border-radius:12px;
+            width:320px;
+            text-align:center;
+            box-shadow:0 0 15px gray;
+        }
+
+        input{
+            width:90%;
+            padding:10px;
+            margin:8px 0;
+        }
+
+        button{
+            width:95%;
+            padding:10px;
+            background:blue;
+            color:white;
+            border:none;
+            cursor:pointer;
+        }
+
+        button:hover{
+            background:darkblue;
+        }
+
+        #msg{
+            color:red;
+        }
+
+        canvas{
+            margin-top:10px;
+        }
+    </style>
+</head>
+
+<body>
+
+<!-- LOGIN -->
+<div class="box" id="loginBox">
+    <h2>🔐 Login Page</h2>
+
+    <input type="text" id="username" placeholder="👤 Enter Username">
+    <input type="password" id="password" placeholder="🔑 Enter Password">
+
+    <button onclick="login()">🚀 Login</button>
+
+    <p id="msg"></p>
+</div>
+
+<!-- WEATHER -->
+<div class="box" id="weatherBox" style="display:none;">
+    <h2>🌤️ Weather App</h2>
+
+    <p id="welcome">👋 Welcome</p>
+
+    <input type="text" id="city" placeholder="🏙️ Enter City">
+    <button onclick="getWeather()">🔍 Search Weather</button>
+
+    <div id="result"></div>
+
+    <!-- GRAPH -->
+    <canvas id="tempGraph" width="250" height="150"></canvas>
+
+    <br>
+    <button onclick="logout()" style="background:red;">🚪 Logout</button>
+</div>
+
+<script>
+
+// LOGIN
+function login(){
+    let user = document.getElementById("username").value;
+    let pass = document.getElementById("password").value;
+
+    if(user !== "" && pass !== ""){
+        document.getElementById("loginBox").style.display = "none";
+        document.getElementById("weatherBox").style.display = "block";
+
+        document.getElementById("welcome").innerText =
+            "👋 Welcome " + user + " ☀️";
+    } else {
+        document.getElementById("msg").innerText =
+            "❌ Please enter username and password!";
+    }
+}
+
+
+// WEATHER + GRAPH
+async function getWeather(){
+
+    let city = document.getElementById("city").value;
+
+    const geo = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${city}&count=1`);
+    const data = await geo.json();
+
+    if(!data.results){
+        document.getElementById("result").innerHTML = "❌ City not found!";
+        return;
+    }
+
+    let lat = data.results[0].latitude;
+    let lon = data.results[0].longitude;
+
+    const weather = await fetch(
+        `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&hourly=temperature_2m&forecast_days=1`
+    );
+
+    const w = await weather.json();
+
+    let temp = w.hourly.temperature_2m[0];
+
+    // 🌤️ Emoji logic
+    let emoji = "🌡️";
+
+    if(temp >= 30){
+        emoji = "☀️ Hot";
+    }
+    else if(temp >= 20){
+        emoji = "🌤️ Warm";
+    }
+    else if(temp >= 10){
+        emoji = "⛅ Cool";
+    }
+    else{
+        emoji = "❄️ Cold";
+    }
+
+    document.getElementById("result").innerHTML = `
+        <h3>🏙️ ${data.results[0].name}</h3>
+        <p>🌡️ Temperature: ${temp} °C</p>
+        <p>🌈 Weather: ${emoji}</p>
+    `;
+
+    drawGraph(w.hourly.temperature_2m);
+}
+
+
+// DRAW GRAPH
+function drawGraph(tempArray){
+
+    let canvas = document.getElementById("tempGraph");
+    let ctx = canvas.getContext("2d");
+
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+
+    for(let i=0;i<10;i++){
+        let value = tempArray[i];
+        let height = value * 3;
+
+        ctx.fillStyle = "blue";
+        ctx.fillRect(i*25, canvas.height - height, 10, height);
+
+        ctx.fillStyle = "black";
+        ctx.fillText("🌡️", i*25, canvas.height - height - 5);
+    }
+}
+
+
+// LOGOUT
+function logout(){
+    location.reload();
+}
+
+</script>
+
+</body>
+</html>   
+
+
+
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
